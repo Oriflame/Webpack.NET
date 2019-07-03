@@ -11,14 +11,14 @@ namespace Webpack.NET.Tests
     public class TestWebpack
     {
         private WebpackConfig _config;
-        private Mock<HttpServerUtilityBase> _server;
+        private Mock<IPathMappingService> _pathMappingService;
         private List<string> _tempFiles;
 
         [SetUp]
         public void Setup()
         {
             _config = new WebpackConfig();
-            _server = new Mock<HttpServerUtilityBase>();
+            _pathMappingService = new Mock<IPathMappingService>();
             _tempFiles = new List<string>();
         }
 
@@ -33,15 +33,15 @@ namespace Webpack.NET.Tests
         [Test]
         public void Constructor_Throws_On_Null_Parameters()
         {
-            Assert.Throws<ArgumentNullException>(() => new Webpack(null, _server.Object));
+            Assert.Throws<ArgumentNullException>(() => new Webpack(null, _pathMappingService.Object));
             Assert.Throws<ArgumentNullException>(() => new Webpack(new[] { new WebpackConfig() }, null));
         }
 
         [Test]
         public void Assets_Are_Lazily_Loaded()
         {
-            var webpack = new Webpack(new[] { _config }, _server.Object);
-            _server.Verify(s => s.MapPath(It.IsAny<string>()), Times.Never());
+            var webpack = new Webpack(new[] { _config }, _pathMappingService.Object);
+            _pathMappingService.Verify(s => s.MapPath(It.IsAny<string>()), Times.Never());
 
             _config.AssetManifestPath = "~/scripts/manifest.json";
             _config.AssetOutputPath = "~/dist";
@@ -49,10 +49,10 @@ namespace Webpack.NET.Tests
             SetupManifestFile(_config.AssetManifestPath, @"{ ""file"": { ""js"": ""file.js"" } }");
 
             Assert.That(webpack.GetAssetUrl("file", "js"), Is.EqualTo("~/dist/file.js"));
-            _server.Verify(s => s.MapPath(It.IsAny<string>()), Times.Once());
+            _pathMappingService.Verify(s => s.MapPath(It.IsAny<string>()), Times.Once());
 
             Assert.That(webpack.GetAssetUrl("file", "js"), Is.EqualTo("~/dist/file.js"));
-            _server.Verify(s => s.MapPath(It.IsAny<string>()), Times.Once());
+            _pathMappingService.Verify(s => s.MapPath(It.IsAny<string>()), Times.Once());
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace Webpack.NET.Tests
             SetupManifestFile(config3.AssetManifestPath, @"{ ""file"": { ""js"": ""file.3.js"" } }");
             SetupManifestFile(config4.AssetManifestPath, @"{ ""other"": { ""js"": ""http://server/file.4.js"" } }");
 
-            var webpack = new Webpack(new[] { config1, config2, config3, config4 }, _server.Object);
+            var webpack = new Webpack(new[] { config1, config2, config3, config4 }, _pathMappingService.Object);
             Assert.That(webpack.GetAssetUrl("code", "js"), Is.EqualTo("~/dist/1/file.1.js"));
             Assert.That(webpack.GetAssetUrl("style", "css"), Is.EqualTo("~/dist/2/file.2.css"));
             Assert.That(webpack.GetAssetUrl("file", "js"), Is.EqualTo("file.3.js"));
@@ -78,14 +78,14 @@ namespace Webpack.NET.Tests
         [Test]
         public void GetAssetUrl_Throws_On_No_Configurations_Specified()
         {
-            var webpack = new Webpack(new WebpackConfig[0], _server.Object);
+            var webpack = new Webpack(new WebpackConfig[0], _pathMappingService.Object);
             Assert.Throws<AssetNotFoundException>(() => webpack.GetAssetUrl("any", "any"));
         }
 
         [Test]
         public void GetAssetUrl_Returns_Null_When_Not_Required_And_No_Configurations_Specified()
         {
-            var webpack = new Webpack(new WebpackConfig[0], _server.Object);
+            var webpack = new Webpack(new WebpackConfig[0], _pathMappingService.Object);
             Assert.That(webpack.GetAssetUrl("any", "any", false), Is.Null);
         }
 
@@ -95,7 +95,7 @@ namespace Webpack.NET.Tests
             _config.AssetManifestPath = "~/scripts/manifest.json";
             SetupManifestFile(_config.AssetManifestPath, @"{ ""file"": { ""js"": ""file.js"" } }");
 
-            var webpack = new Webpack(new[] { _config }, _server.Object);
+            var webpack = new Webpack(new[] { _config }, _pathMappingService.Object);
             Assert.Throws<AssetNotFoundException>(() => webpack.GetAssetUrl("non-existant", "js"));
             Assert.Throws<AssetNotFoundException>(() => webpack.GetAssetUrl("file", "non-existant"));
             Assert.Throws<AssetNotFoundException>(() => webpack.GetAssetUrl("non-existant", "non-existant"));
@@ -107,7 +107,7 @@ namespace Webpack.NET.Tests
             _config.AssetManifestPath = "~/scripts/manifest.json";
             SetupManifestFile(_config.AssetManifestPath, @"{ ""file"": { ""js"": ""file.js"" } }");
 
-            var webpack = new Webpack(new[] { _config }, _server.Object);
+            var webpack = new Webpack(new[] { _config }, _pathMappingService.Object);
             Assert.That(webpack.GetAssetUrl("non-existant", "js", false), Is.Null);
             Assert.That(webpack.GetAssetUrl("file", "non-existant", false), Is.Null);
             Assert.That(webpack.GetAssetUrl("non-existant", "non-existant", false), Is.Null);
@@ -117,7 +117,7 @@ namespace Webpack.NET.Tests
         {
             var tempFile = Path.GetTempFileName();
             _tempFiles.Add(tempFile);
-            _server.Setup(s => s.MapPath(manifestPath)).Returns(tempFile);
+            _pathMappingService.Setup(s => s.MapPath(manifestPath)).Returns(tempFile);
             File.WriteAllText(tempFile, manifestContent);
         }
     }

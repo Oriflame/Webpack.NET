@@ -1,6 +1,6 @@
 # Webpack.NET
 
-Integrating webpack into ASP.NET MVC projects.
+Integrating webpack into Sitecore ASP.NET MVC projects.
 
 ## Asset Caching
 Caching is good <sup>[citation needed]</sup>.  The [webpack documentation](https://webpack.js.org/guides/caching/#components/sidebar/sidebar.jsx) has a good description of the problem and proposed solution for caching of webpack assets so this focuses on how that can be integrated into your ASP.NET MVC project.

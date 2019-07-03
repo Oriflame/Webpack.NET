@@ -21,12 +21,12 @@ namespace Webpack.NET
         /// <param name="configurations">The webpack configurations.</param>
         /// <exception cref="System.ArgumentNullException">application</exception>
         [ExcludeFromCodeCoverage]
-        public static void ConfigureWebpack(this HttpApplication application, params WebpackConfig[] configurations)
+        public static void ConfigureWebpack(this HttpApplication application, IPathMappingService pathMappingService, params WebpackConfig[] configurations)
         {
             if (application == null) throw new ArgumentNullException(nameof(application));
 
             new HttpApplicationStateWrapper(application.Application)
-                    .ConfigureWebpack(new Webpack(configurations, new HttpServerUtilityWrapper(application.Server)));
+                    .ConfigureWebpack(new Webpack(configurations, pathMappingService));
         }
 
         /// <summary>

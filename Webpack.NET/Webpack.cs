@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Hosting;
 
 namespace Webpack.NET
 {
@@ -24,13 +25,13 @@ namespace Webpack.NET
 		/// <exception cref="System.ArgumentNullException">configs
 		/// or
 		/// server</exception>
-		public Webpack(IEnumerable<WebpackConfig> configurations, HttpServerUtilityBase httpServerUtility)
+		public Webpack(IEnumerable<WebpackConfig> configurations, IPathMappingService pathMappingService)
 		{
 			if (configurations == null) throw new ArgumentNullException(nameof(configurations));
-			if (httpServerUtility == null) throw new ArgumentNullException(nameof(httpServerUtility));
+			if (pathMappingService == null) throw new ArgumentNullException(nameof(pathMappingService));
 
 			this.assets = new Lazy<IEnumerable<WebpackAssetsDictionary>>(() => configurations
-				.Select(config => GetAssetDictionaryForConfig(config, httpServerUtility))
+				.Select(config => GetAssetDictionaryForConfig(config, pathMappingService))
 				.ToList());
 		}
 
@@ -42,9 +43,9 @@ namespace Webpack.NET
 		/// <returns>
 		/// The webpack asset dictionary.
 		/// </returns>
-		private static WebpackAssetsDictionary GetAssetDictionaryForConfig(WebpackConfig configuration, HttpServerUtilityBase httpServerUtility)
+		private static WebpackAssetsDictionary GetAssetDictionaryForConfig(WebpackConfig configuration, IPathMappingService pathMappingService)
 		{
-			var assets = WebpackAssetsDictionary.FromFile(httpServerUtility.MapPath(configuration.AssetManifestPath));
+			var assets = WebpackAssetsDictionary.FromFile(pathMappingService.MapPath(configuration.AssetManifestPath));
 			assets.RootFolder = configuration.AssetOutputPath;
 
 			return assets;

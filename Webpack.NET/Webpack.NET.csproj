@@ -72,7 +72,9 @@
     <Compile Include="AssetNotFoundException.cs" />
     <Compile Include="ConfigurationExtensions.cs" />
     <Compile Include="HtmlHelperExtensions.cs" />
+    <Compile Include="IPathMappingService.cs" />
     <Compile Include="IWebpack.cs" />
+    <Compile Include="PathMappingService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UrlHelperExtensions.cs" />
     <Compile Include="Webpack.cs" />

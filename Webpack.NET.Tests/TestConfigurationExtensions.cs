@@ -11,8 +11,9 @@ namespace Webpack.NET.Tests
         [Test]
         public void ConfigureWebpack_Throws_On_Null_Parameters()
         {
+            var pathMappingService = new Mock<IPathMappingService>();
             HttpApplication application = null;
-            Assert.Throws<ArgumentNullException>(() => application.ConfigureWebpack(new WebpackConfig()));
+            Assert.Throws<ArgumentNullException>(() => application.ConfigureWebpack(pathMappingService.Object, new WebpackConfig()));
             Assert.Throws<ArgumentNullException>(() => new HttpApplication().ConfigureWebpack(null));
         }
 
